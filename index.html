@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('/static/images/background.jpg');
+            background-size: cover;
+            margin: 0;
+        }
+        #chat {
+            width: 400px;
+            height: 600px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #header {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #logout {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            width: fit-content;
+            max-width: 70%;
+        }
+        .message.sent {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.received {
+            background-color: #e0e0e0;
+            color: black;
+            align-self: flex-start;
+        }
+        #input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        #input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        #input button {
+            padding: 10px;
+            margin-left: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat" class="animate__animated animate__fadeInUp">
+        <div id="header">
+            REAL-TIME CHAT
+            <button id="logout" onclick="logout()">Logout</button>
+        </div>
+        <div id="messages"></div>
+        <div id="input">
+            <input id="messageInput" type="text" placeholder="Type a message..."/>
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+        var socket = io();
+
+        socket.on('message', function(msg) {
+            var messageElement = document.createElement('div');
+            messageElement.textContent = msg;
+            messageElement.className = 'message received';
+            document.getElementById('messages').appendChild(messageElement);
+            anime({
+                targets: messageElement,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 500,
+                easing: 'easeOutExpo'
+            });
+        });
+
+        function sendMessage() {
+            var message = document.getElementById('messageInput').value;
+            if (message.trim() !== '') {
+                var messageElement = document.createElement('div');
+                messageElement.textContent = message;
+                messageElement.className = 'message sent';
+                document.getElementById('messages').appendChild(messageElement);
+                anime({
+                    targets: messageElement,
+                    opacity: [0, 1],
+                    translateY: [20, 0],
+                    duration: 500,
+                    easing: 'easeOutExpo'
+                });
+                socket.send(message);
+                document.getElementById('messageInput').value = '';
+            }
+        }
+
+        function logout() {
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html>
